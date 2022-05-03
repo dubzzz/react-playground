@@ -4,7 +4,7 @@ type MyErrorType = { [myErrorSymbol]: Promise<unknown> } | Promise<unknown>;
 
 export class MyError {
   static from(p: Promise<unknown>): MyErrorType {
-    return { [myErrorSymbol]: p };
+    return { [myErrorSymbol]: p, _suppressLogging: true } as MyErrorType;
   }
   static isValid(u: unknown): u is MyErrorType {
     return (
