@@ -1,12 +1,16 @@
 import { delayed } from "./Delayed";
-import { myLazy as lazy } from "./MyLazy";
-//import { lazy } from "react";
-import Suspense from "./MySuspense";
-//import { Suspense } from "react";
+import { MyError } from "./MyError";
 
-const MyComponent = lazy(() => delayed(import("./MyComponent"), 10_000));
+import { myLazy as lazy } from "./MyLazy";
+import Suspense from "./MySuspense";
+
+const MyComponent = lazy(
+  () => delayed(import("./MyComponent"), 10_000),
+  (e) => MyError.from(e)
+);
 
 export default function App() {
+  console.info("[App] Rendering the App");
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <MyComponent />

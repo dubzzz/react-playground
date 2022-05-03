@@ -1,4 +1,5 @@
 import React from "react";
+import { MyError } from "./MyError";
 
 export type Props = {
   /** Fallback component to be mount in case the wrapped component is not ready yet */
@@ -23,14 +24,14 @@ export default class MySuspense extends React.Component<Props, State> {
     this.state = { loading: false, awaitedError: undefined };
   }
   componentDidCatch(error: unknown) {
-    if (error === null || typeof error !== "object" || !("then" in error)) {
+    if (!MyError.isValid(error)) {
       // Unhandled exception, must be caught by another error boundary
       console.info("[Suspense] Caught an unhandled error", error);
       throw error;
     }
     console.info("[Suspense] Caught a 'Promise'", error);
     this.setState({ loading: true, awaitedError: error });
-    Promise.resolve(error).then(
+    MyError.toPromise(error).then(
       () => {
         console.info("[Suspense] Promise resolved successfully");
         this.setState((previousState) => {
