@@ -31,8 +31,15 @@ export function myLazy<TProps>(
       console.info("[lazy] No Component to render, throwing...");
       // In theory, `React.lazy` is supposed to throw instances of Promises, that will be
       // captured and caught by a boundary defined via the `React.Suspense`.
-      // It seems that throwing the raw Promise somehow gets catch by React, making the
-      // trick not reproducible except by rewrapping the Promise with another instance.
+      // If we want to build our own `React.Suspense` we cannot directly use this trick as
+      // React somehow catches any thrown Promise. We need to rewrap it into another instance
+      // not shaped as a Promise but making the Promise accessible for our own `React.Suspense`.
+      // Here is the code capturing any error thrown during render:
+      // >   } catch (originalError) {
+      // >       if (originalError !== null && typeof originalError === 'object' && typeof originalError.then === 'function') {
+      // >         // Don't replay promises. Treat everything else like an error.
+      // >         throw originalError;
+      // >       } // Keep this code in sync with handleError; any changes here must have
       throw promiseWrapper(awaited);
     }
     console.info("[lazy] Rendering the Component");
