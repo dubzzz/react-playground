@@ -30,13 +30,14 @@ export default class MySuspense extends React.Component<Props, State> {
       throw error;
     }
     console.info("[Suspense] Caught a 'Promise'", error);
-    this.setState({ loading: true, awaitedError: error });
-    MyError.toPromise(error).then(
+    const awaitedError = MyError.toPromise(error);
+    this.setState({ loading: true, awaitedError });
+    awaitedError.then(
       () => {
         console.info("[Suspense] Promise resolved successfully");
         this.setState((previousState) => {
           // The last awaited Promise is ours, we can go ahead
-          if (previousState.awaitedError === error) {
+          if (previousState.awaitedError === awaitedError) {
             return { loading: false, awaitedError: undefined };
           }
           // We still need to wait, our Promise is not the one we really waited for
