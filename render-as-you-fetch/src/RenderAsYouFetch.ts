@@ -47,10 +47,8 @@ export function useRenderAsYouFetch<TDeps extends unknown[], TOut>(
   return {
     get: (): TOut => {
       if ("out" in data) {
-        console.debug("Ready for:", { data, deps, cache });
         return data.out!;
       }
-      console.debug("Not ready yet!", { data, deps, cache });
       throw data.p;
     },
   };
