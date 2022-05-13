@@ -20,7 +20,7 @@ function App() {
 
   return (
     <div>
-      <button onClick={() => setCb((cb) => cb + 10)}>Run</button>
+      <button onClick={() => setCb((cb) => cb + 100)}>Run</button>
       <button onClick={() => setCb((cb) => cb + 1)}>+1</button> — Current is{" "}
       {cb}
       <Br />
@@ -29,7 +29,7 @@ function App() {
         checked={classicMode}
         onChange={(e) => {
           setClassicMode(e.target.checked);
-          setCb((cb) => cb + 10);
+          setCb((cb) => cb + 100);
         }}
       ></input>
       Enable classic mode
@@ -45,6 +45,11 @@ function App() {
             Other users are:
             <ListClassic cb={cb} />
           </div>
+          <Br />
+          <div>
+            Yet other users are:
+            <ListClassic cb={cb + 10} />
+          </div>
         </div>
       ) : (
         <Suspense fallback={<div>Loading {cb}...</div>}>
@@ -56,6 +61,11 @@ function App() {
             <div>
               Other users are:
               <List cb={cb} />
+            </div>
+            <Br />
+            <div>
+              Yet other users are:
+              <List cb={cb + 10} />
             </div>
           </div>
         </Suspense>
