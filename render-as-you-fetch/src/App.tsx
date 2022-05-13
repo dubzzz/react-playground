@@ -1,6 +1,6 @@
 import { Suspense, useState } from "react";
-import List, { ListItem } from "./List";
-import ListClassic, { ListItemClassic } from "./ListClassic";
+import Team from "./Team";
+import TeamClassic from "./TeamClassic";
 
 function Br() {
   return (
@@ -23,7 +23,7 @@ function App() {
       <button onClick={() => setCb(Math.ceil(Math.random() * 10000))}>
         Run
       </button>{" "}
-      — Current is {cb}
+      — Current is {cb} — <span id="counter"></span>
       <Br />
       <input
         type="checkbox"
@@ -36,45 +36,11 @@ function App() {
       Enable classic mode
       <Br />
       {classicMode ? (
-        <div>
-          <div>
-            Current user is:{" "}
-            <ListItemClassic userId={`id:current:${classicMode}`} />
-          </div>
-          <Br />
-          <div>
-            Other users are:
-            <ListClassic cb={cb} />
-          </div>
-          <Br />
-          <div>
-            Yet other users are:
-            <ListClassic cb={cb + 10} />
-          </div>
-        </div>
+        <TeamClassic cb={cb} />
       ) : (
-        <div>
-          <div>
-            Current user is:{" "}
-            <Suspense fallback={<div>Please wait...</div>}>
-              <ListItem userId={"id:current"} />
-            </Suspense>
-          </div>
-          <Br />
-          <div>
-            Other users are:
-            <Suspense fallback={<div>Please wait...</div>}>
-              <List cb={cb} />
-            </Suspense>
-          </div>
-          <Br />
-          <div>
-            Yet other users are:
-            <Suspense fallback={<div>Please wait...</div>}>
-              <List cb={cb + 10} />
-            </Suspense>
-          </div>
-        </div>
+        <Suspense fallback={<div>Please wait...</div>}>
+          <Team cb={cb} />
+        </Suspense>
       )}
     </div>
   );

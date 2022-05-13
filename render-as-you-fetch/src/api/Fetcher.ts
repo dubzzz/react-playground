@@ -1,6 +1,21 @@
+let numQueries = 0;
+
+function updateCounter() {
+  const counterDiv = document.getElementById("counter");
+  if (!counterDiv) {
+    return;
+  }
+  counterDiv.innerText = `${numQueries} running`;
+}
+
 function delay<T>(p: Promise<T>): Promise<T> {
+  ++numQueries;
+  updateCounter();
   return new Promise<T>((resolve) => {
     setTimeout(() => resolve(p), 5000 + Math.random() * 5000);
+  }).finally(() => {
+    --numQueries;
+    updateCounter();
   });
 }
 
