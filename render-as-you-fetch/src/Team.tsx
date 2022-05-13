@@ -28,7 +28,9 @@ export default function Team(props: Props) {
       </ul>
       <p>Referee:</p>
       <ul>
-        <User userId={`id:${props.cb + 2000}`} />
+        <Suspense fallback={<li>Please wait...</li>}>
+          <User userId={`id:${props.cb + 2000}`} />
+        </Suspense>
       </ul>
     </div>
   );
