@@ -9,11 +9,11 @@ export default function List(props: Props) {
 
   return (
     <ul>
-      <Suspense fallback={<li>Please wait...</li>}>
-        {users.get().map((userId) => (
-          <ListItem key={userId} userId={userId} />
-        ))}
-      </Suspense>
+      {users.get().map((userId) => (
+        <Suspense key={userId} fallback={<li>Please wait...</li>}>
+          <ListItem userId={userId} />
+        </Suspense>
+      ))}
     </ul>
   );
 }

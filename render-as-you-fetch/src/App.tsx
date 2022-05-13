@@ -20,16 +20,17 @@ function App() {
 
   return (
     <div>
-      <button onClick={() => setCb((cb) => cb + 100)}>Run</button>
-      <button onClick={() => setCb((cb) => cb + 1)}>+1</button> — Current is{" "}
-      {cb}
+      <button onClick={() => setCb(Math.ceil(Math.random() * 10000))}>
+        Run
+      </button>{" "}
+      — Current is {cb}
       <Br />
       <input
         type="checkbox"
         checked={classicMode}
         onChange={(e) => {
           setClassicMode(e.target.checked);
-          setCb((cb) => cb + 100);
+          setCb(Math.ceil(Math.random() * 10000));
         }}
       ></input>
       Enable classic mode
@@ -52,23 +53,28 @@ function App() {
           </div>
         </div>
       ) : (
-        <Suspense fallback={<div>Loading {cb}...</div>}>
+        <div>
           <div>
-            <div>
-              Current user is: <ListItem userId={"id:current"} />
-            </div>
-            <Br />
-            <div>
-              Other users are:
-              <List cb={cb} />
-            </div>
-            <Br />
-            <div>
-              Yet other users are:
-              <List cb={cb + 10} />
-            </div>
+            Current user is:{" "}
+            <Suspense fallback={<div>Please wait...</div>}>
+              <ListItem userId={"id:current"} />
+            </Suspense>
           </div>
-        </Suspense>
+          <Br />
+          <div>
+            Other users are:
+            <Suspense fallback={<div>Please wait...</div>}>
+              <List cb={cb} />
+            </Suspense>
+          </div>
+          <Br />
+          <div>
+            Yet other users are:
+            <Suspense fallback={<div>Please wait...</div>}>
+              <List cb={cb + 10} />
+            </Suspense>
+          </div>
+        </div>
       )}
     </div>
   );
