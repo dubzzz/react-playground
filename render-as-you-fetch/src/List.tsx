@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { retrieveUserIds, retrieveUserName } from "./api/Fetcher";
 import { useRenderAsYouFetch } from "./RenderAsYouFetch";
 
@@ -8,9 +9,11 @@ export default function List(props: Props) {
 
   return (
     <ul>
-      {users.get().map((userId) => (
-        <ListItem key={userId} userId={userId} />
-      ))}
+      <Suspense fallback={<li>Please wait...</li>}>
+        {users.get().map((userId) => (
+          <ListItem key={userId} userId={userId} />
+        ))}
+      </Suspense>
     </ul>
   );
 }

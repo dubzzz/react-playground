@@ -37,7 +37,8 @@ function App() {
       {classicMode ? (
         <div>
           <div>
-            Current user is: <ListItemClassic userId={"id:current"} />
+            Current user is:{" "}
+            <ListItemClassic userId={`id:current:${classicMode}`} />
           </div>
           <Br />
           <div>
