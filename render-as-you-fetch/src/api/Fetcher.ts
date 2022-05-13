@@ -1,6 +1,6 @@
 function delay<T>(p: Promise<T>): Promise<T> {
   return new Promise<T>((resolve) => {
-    setTimeout(() => resolve(p), 5000);
+    setTimeout(() => resolve(p), 3000 + Math.random() * 2000);
   });
 }
 

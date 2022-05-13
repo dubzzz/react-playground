@@ -1,5 +1,6 @@
 import { Suspense, useState } from "react";
 import List, { ListItem } from "./List";
+import ListClassic, { ListItemClassic } from "./ListClassic";
 
 function Br() {
   return (
@@ -15,24 +16,49 @@ function Br() {
 
 function App() {
   const [cb, setCb] = useState(0);
+  const [classicMode, setClassicMode] = useState(false);
 
   return (
     <div>
+      <button onClick={() => setCb((cb) => cb + 10)}>Run</button>
       <button onClick={() => setCb((cb) => cb + 1)}>+1</button> — Current is{" "}
       {cb}
       <Br />
-      <Suspense fallback={<div>Loading {cb}...</div>}>
+      <input
+        type="checkbox"
+        checked={classicMode}
+        onChange={(e) => {
+          setClassicMode(e.target.checked);
+          setCb((cb) => cb + 10);
+        }}
+      ></input>
+      Enable classic mode
+      <Br />
+      {classicMode ? (
         <div>
           <div>
-            Current user is: <ListItem userId={"id:current"} />
+            Current user is: <ListItemClassic userId={"id:current"} />
           </div>
           <Br />
           <div>
             Other users are:
-            <List cb={cb} />
+            <ListClassic cb={cb} />
           </div>
         </div>
-      </Suspense>
+      ) : (
+        <Suspense fallback={<div>Loading {cb}...</div>}>
+          <div>
+            <div>
+              Current user is: <ListItem userId={"id:current"} />
+            </div>
+            <Br />
+            <div>
+              Other users are:
+              <List cb={cb} />
+            </div>
+          </div>
+        </Suspense>
+      )}
     </div>
   );
 }

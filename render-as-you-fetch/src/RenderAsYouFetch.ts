@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type AsYouFetch<T> = {
   get: () => T;
@@ -57,4 +57,37 @@ export function useRenderAsYouFetch<TDeps extends unknown[], TOut>(
       throw data.p;
     },
   };
+}
+
+export function useClassicFetch<TDeps extends unknown[], TOut>(
+  launcher: (...deps: TDeps) => Promise<TOut>,
+  deps: TDeps
+): TOut | undefined {
+  const [data, setData] = useState(() => findOrCreateInCache(launcher, deps));
+  const freshData = findOrCreateInCache(launcher, deps);
+  if (freshData !== data) {
+    setData(freshData);
+  }
+
+  const [fetched, setFetched] = useState<TOut>();
+  useEffect(() => {
+    const data = findOrCreateInCache(launcher, deps);
+    if ("out" in data) {
+      setFetched(data.out);
+      return;
+    }
+    let canceled = false;
+    setFetched(undefined);
+    data.p.then((out) => {
+      if (canceled) {
+        return;
+      }
+      setFetched(out);
+    });
+    return () => {
+      canceled = true;
+    };
+  }, [launcher, deps]);
+
+  return fetched;
 }
