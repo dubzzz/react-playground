@@ -15,14 +15,7 @@ export default function TeamClassic(props: Props) {
       <p>
         <b>Team:</b>
       </p>
-      <p>
-        Admin:{" "}
-        <i>
-          In classic mode, we wait for the list of users to be known before
-          starting the loading for Admin even if we already have all the needed
-          details to start the query
-        </i>
-      </p>
+      <p>Admin:</p>
       <ul>
         <UserClassic userId={`id:${props.cb + 1000}`} />
       </ul>
