@@ -1,5 +1,5 @@
 import { Suspense, useState } from "react";
-import Team from "./Team";
+import Team, { TeamNoIntermediateSpinner } from "./Team";
 import TeamClassic from "./TeamClassic";
 
 function Br() {
@@ -16,7 +16,7 @@ function Br() {
 
 function App() {
   const [cb, setCb] = useState(0);
-  const [classicMode, setClassicMode] = useState(false);
+  const [type, setType] = useState(0);
 
   return (
     <div>
@@ -25,21 +25,25 @@ function App() {
       </button>{" "}
       — Current is {cb} — <span id="counter"></span>
       <Br />
-      <input
-        type="checkbox"
-        checked={classicMode}
-        onChange={(e) => {
-          setClassicMode(e.target.checked);
+      <button
+        onClick={() => {
+          setType((t) => (t + 1) % 3);
           setCb(Math.ceil(Math.random() * 10000));
         }}
-      ></input>
-      Enable classic mode
+      >
+        Change
+      </button>
+      — {["As-You-Fetch (1)", "As-You-Fetch (2)", "Classic"][type]}
       <Br />
-      {classicMode ? (
+      {type === 2 ? (
         <TeamClassic cb={cb} />
-      ) : (
+      ) : type === 1 ? (
         <Suspense fallback={<div>Please wait...</div>}>
           <Team cb={cb} />
+        </Suspense>
+      ) : (
+        <Suspense fallback={<div>Please wait...</div>}>
+          <TeamNoIntermediateSpinner cb={cb} />
         </Suspense>
       )}
     </div>

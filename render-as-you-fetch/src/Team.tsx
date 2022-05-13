@@ -36,6 +36,33 @@ export default function Team(props: Props) {
   );
 }
 
+export function TeamNoIntermediateSpinner(props: Props) {
+  // To be wrapped into <Suspense />
+  const users = useRenderAsYouFetch(retrieveUserIds, [props.cb]);
+
+  return (
+    <div>
+      <p>
+        <b>Team:</b>
+      </p>
+      <p>Admin:</p>
+      <ul>
+        <User userId={`id:${props.cb + 1000}`} />
+      </ul>
+      <p>Users:</p>
+      <ul>
+        {users.get().map((userId) => (
+          <User key={userId} userId={userId} />
+        ))}
+      </ul>
+      <p>Referee:</p>
+      <ul>
+        <User userId={`id:${props.cb + 2000}`} />
+      </ul>
+    </div>
+  );
+}
+
 type PropsItem = { userId: string };
 
 export function User(props: PropsItem) {
