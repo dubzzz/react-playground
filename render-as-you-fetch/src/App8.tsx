@@ -17,6 +17,9 @@ type Props = { teamNumber: number };
 export default function App(props: Props) {
   return (
     <Suspense fallback={<div>Please wait...</div>}>
+      <p>
+        <i>This App is still a Work-In-Progress</i>
+      </p>
       <Page {...props} />
     </Suspense>
   );
