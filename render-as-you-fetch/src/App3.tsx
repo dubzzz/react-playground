@@ -3,21 +3,23 @@
 // There we are easily able to wait for a whole block to be ready before rendering it into the DOM.
 
 import { Suspense } from "react";
-import { retrieveUserIds, retrieveUserName } from "./api/Fetcher";
+import { retrieveTeam, retrieveMemberName } from "./api/Fetcher";
 import { useRenderAsYouFetch } from "./RenderAsYouFetch";
 
-type Props = { cb: number };
+type Props = { teamNumber: number };
 
 export default function App(props: Props) {
   return (
     <Suspense fallback={<div>Please wait...</div>}>
-      <Team {...props} />
+      <Page {...props} />
     </Suspense>
   );
 }
 
-function Team(props: Props) {
-  const users = useRenderAsYouFetch(retrieveUserIds, [props.cb]);
+type PageProps = { teamNumber: number };
+
+function Page(props: PageProps) {
+  const team = useRenderAsYouFetch(retrieveTeam, [props.teamNumber]);
 
   return (
     <div>
@@ -26,30 +28,30 @@ function Team(props: Props) {
       </p>
       <p>Admin:</p>
       <ul>
-        <User userId={`id:${props.cb + 1000}`} />
+        <Member id={`id:${props.teamNumber + 1000}`} />
       </ul>
-      <p>Users:</p>
+      <p>Members:</p>
       <ul>
-        {users.get().map((userId) => (
-          <User key={userId} userId={userId} />
+        {team.get().members.map((userId) => (
+          <Member key={userId} id={userId} />
         ))}
       </ul>
       <p>Referee:</p>
       <ul>
-        <User userId={`id:${props.cb + 2000}`} />
+        <Member id={`id:${props.teamNumber + 2000}`} />
       </ul>
     </div>
   );
 }
 
-type PropsUser = { userId: string };
+type PropsMember = { id: string };
 
-export function User(props: PropsUser) {
-  const userIdToName = useRenderAsYouFetch(retrieveUserName, [props.userId]);
+function Member(props: PropsMember) {
+  const memberName = useRenderAsYouFetch(retrieveMemberName, [props.id]);
 
   return (
     <li>
-      id({props.userId}) =&gt; {userIdToName.get()}
+      id({props.id}) =&gt; {memberName.get()}
     </li>
   );
 }

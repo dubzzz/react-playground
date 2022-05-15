@@ -3,21 +3,23 @@
 // are done handled via the parents through Suspense
 
 import { Suspense } from "react";
-import { retrieveUserIds, retrieveUserName } from "./api/Fetcher";
+import { retrieveTeam, retrieveMemberName } from "./api/Fetcher";
 import { useRenderAsYouFetch } from "./RenderAsYouFetch";
 
-type Props = { cb: number };
+type Props = { teamNumber: number };
 
 export default function App(props: Props) {
   return (
     <Suspense fallback={<div>Please wait...</div>}>
-      <Team {...props} />
+      <Page {...props} />
     </Suspense>
   );
 }
 
-function Team(props: Props) {
-  const users = useRenderAsYouFetch(retrieveUserIds, [props.cb]);
+type PageProps = { teamNumber: number };
+
+function Page(props: PageProps) {
+  const team = useRenderAsYouFetch(retrieveTeam, [props.teamNumber]);
 
   return (
     <div>
@@ -27,35 +29,35 @@ function Team(props: Props) {
       <p>Admin:</p>
       <ul>
         <Suspense fallback={<li>Please wait...</li>}>
-          <User userId={`id:${props.cb + 1000}`} />
+          <Member id={`id:${props.teamNumber + 1000}`} />
         </Suspense>
       </ul>
-      <p>Users:</p>
+      <p>Members:</p>
       <ul>
-        {users.get().map((userId) => (
+        {team.get().members.map((userId) => (
           <Suspense key={userId} fallback={<li>Please wait...</li>}>
-            <User userId={userId} />
+            <Member id={userId} />
           </Suspense>
         ))}
       </ul>
       <p>Referee:</p>
       <ul>
         <Suspense fallback={<li>Please wait...</li>}>
-          <User userId={`id:${props.cb + 2000}`} />
+          <Member id={`id:${props.teamNumber + 2000}`} />
         </Suspense>
       </ul>
     </div>
   );
 }
 
-type PropsUser = { userId: string };
+type PropsMember = { id: string };
 
-export function User(props: PropsUser) {
-  const userIdToName = useRenderAsYouFetch(retrieveUserName, [props.userId]);
+function Member(props: PropsMember) {
+  const name = useRenderAsYouFetch(retrieveMemberName, [props.id]);
 
   return (
     <li>
-      id({props.userId}) =&gt; {userIdToName.get()}
+      id({props.id}) =&gt; {name.get()}
     </li>
   );
 }

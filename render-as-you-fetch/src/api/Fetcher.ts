@@ -25,18 +25,26 @@ function delay<T>(p: Promise<T>, type: string): Promise<T> {
   });
 }
 
-export function retrieveUserIds(cb: number): Promise<string[]> {
-  console.info(`START: retrieveUserIds(${cb})`);
+type Team = {
+  teamName: string;
+  members: string[];
+};
+
+export function retrieveTeam(teamNumber: number): Promise<Team> {
+  console.info(`START: retrieveTeam(${teamNumber})`);
   return delay(
-    Promise.resolve([...Array(4)].map((_, i) => "id:" + String(cb + i))),
-    "retrieveUserIds"
-  ).finally(() => console.info(`END: retrieveUserIds(${cb})`));
+    Promise.resolve({
+      teamName: `Team ${teamNumber.toString(16).toUpperCase()}`,
+      members: [...Array(4)].map((_, i) => "id:" + String(teamNumber + i)),
+    }),
+    "retrieveTeam"
+  ).finally(() => console.info(`END: retrieveTeam(${teamNumber})`));
 }
 
-export function retrieveUserName(userId: string): Promise<string> {
-  console.info(`START: retrieveUserName(${userId})`);
+export function retrieveMemberName(memberId: string): Promise<string> {
+  console.info(`START: retrieveMemberName(${memberId})`);
   return delay(
-    Promise.resolve(`User ${userId.substring(3)}`),
-    "retrieveUserName"
-  ).finally(() => console.info(`END: retrieveUserName(${userId})`));
+    Promise.resolve(`User ${memberId.substring(3)}`),
+    "retrieveMemberName"
+  ).finally(() => console.info(`END: retrieveMemberName(${memberId})`));
 }

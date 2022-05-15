@@ -1,19 +1,21 @@
 // Basic application using normal fetch via states and effects
 // and without any render-as-you-fetch system
 
-import { retrieveUserIds, retrieveUserName } from "./api/Fetcher";
+import { retrieveTeam, retrieveMemberName } from "./api/Fetcher";
 import { useClassicFetch } from "./RenderAsYouFetch";
 
-type Props = { cb: number };
+type Props = { teamNumber: number };
 
 export default function App(props: Props) {
-  return <Team {...props} />;
+  return <Page {...props} />;
 }
 
-function Team(props: Props) {
-  const users = useClassicFetch(retrieveUserIds, [props.cb]);
+type PageProps = { teamNumber: number };
 
-  if (users === undefined) {
+function Page(props: PageProps) {
+  const team = useClassicFetch(retrieveTeam, [props.teamNumber]);
+
+  if (team === undefined) {
     return <div>Please wait...</div>;
   }
 
@@ -24,34 +26,34 @@ function Team(props: Props) {
       </p>
       <p>Admin:</p>
       <ul>
-        <User userId={`id:${props.cb + 1000}`} />
+        <Member id={`id:${props.teamNumber + 1000}`} />
       </ul>
-      <p>Users:</p>
+      <p>Member:</p>
       <ul>
-        {users.map((userId) => (
-          <User key={userId} userId={userId} />
+        {team.members.map((userId) => (
+          <Member key={userId} id={userId} />
         ))}
       </ul>
       <p>Referee:</p>
       <ul>
-        <User userId={`id:${props.cb + 2000}`} />
+        <Member id={`id:${props.teamNumber + 2000}`} />
       </ul>
     </div>
   );
 }
 
-type PropsUser = { userId: string };
+type PropsMember = { id: string };
 
-export function User(props: PropsUser) {
-  const userIdToName = useClassicFetch(retrieveUserName, [props.userId]);
+function Member(props: PropsMember) {
+  const name = useClassicFetch(retrieveMemberName, [props.id]);
 
-  if (userIdToName === undefined) {
+  if (name === undefined) {
     return <li>Please wait...</li>;
   }
 
   return (
     <li>
-      id({props.userId}) =&gt; {userIdToName}
+      id({props.id}) =&gt; {name}
     </li>
   );
 }
