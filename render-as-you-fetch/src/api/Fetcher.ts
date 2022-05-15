@@ -48,3 +48,22 @@ export function retrieveMemberName(memberId: string): Promise<string> {
     "retrieveMemberName"
   ).finally(() => console.info(`END: retrieveMemberName(${memberId})`));
 }
+
+export function retrieveCurrentUser(teamNumber: number): Promise<string> {
+  // teamNumber is used as a cache buster
+  console.info(`START: retrieveCurrentUser(${teamNumber})`);
+  return delay(
+    Promise.resolve(`User ${teamNumber.toString(36).toUpperCase()}`),
+    "retrieveCurrentUser"
+  ).finally(() => console.info(`END: retrieveCurrentUser(${teamNumber})`));
+}
+
+export function retrieveNews(teamNumber: number): Promise<string[]> {
+  console.info(`START: retrieveNews(${teamNumber})`);
+  return delay(
+    Promise.resolve(
+      [...Array(4)].map((_, i) => "news:" + String(teamNumber + i))
+    ),
+    "retrieveNews"
+  ).finally(() => console.info(`END: retrieveNews(${teamNumber})`));
+}
