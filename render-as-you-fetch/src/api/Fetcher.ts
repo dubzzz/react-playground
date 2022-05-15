@@ -25,7 +25,7 @@ function delay<T>(p: Promise<T>, type: string): Promise<T> {
   });
 }
 
-type Team = {
+export type Team = {
   teamName: string;
   members: string[];
 };
