@@ -6,7 +6,7 @@ import App3 from "./App3";
 const KnownTypes = [App1, App2, App3];
 
 function App() {
-  const [cb, setCb] = useState(0);
+  const [teamNumber, setTeamNumber] = useState(0);
   const [type, setType] = useState(0);
 
   const SelectedApp = KnownTypes[type];
@@ -18,16 +18,16 @@ function App() {
           key={index}
           onClick={() => {
             setType(index);
-            setCb(Math.ceil(Math.random() * 10000));
+            setTeamNumber(Math.ceil(Math.random() * 10000));
           }}
           style={type === index ? { border: "1px solid red" } : {}}
         >
           {index + 1}
         </button>
       ))}{" "}
-      — Current is {cb} — <span id="counter"></span>
+      — Current is {teamNumber} — <span id="counter"></span>
       <Br />
-      {<SelectedApp cb={cb} />}
+      {<SelectedApp teamNumber={teamNumber} />}
     </div>
   );
 }
