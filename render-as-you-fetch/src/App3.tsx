@@ -3,7 +3,14 @@
 // There we are easily able to wait for a whole block to be ready before rendering it into the DOM.
 
 import { Suspense } from "react";
-import { retrieveTeam, retrieveMemberName } from "./api/Fetcher";
+import {
+  retrieveTeam,
+  retrieveMemberName,
+  retrieveCurrentUser,
+  Team,
+  retrieveNews,
+} from "./api/Fetcher";
+import Card from "./Card";
 import { useRenderAsYouFetch } from "./RenderAsYouFetch";
 
 type Props = { teamNumber: number };
@@ -23,35 +30,77 @@ function Page(props: PageProps) {
 
   return (
     <div>
-      <p>
-        <b>Team:</b>
-      </p>
-      <p>Admin:</p>
+      <Header teamNumber={props.teamNumber} team={team.get()} />
+      <Content team={team.get()} />
+      <Footer teamNumber={props.teamNumber} />
+    </div>
+  );
+}
+
+type PropsHeader = {
+  teamNumber: number;
+  team: Team;
+};
+
+function Header(props: PropsHeader) {
+  const currentUser = useRenderAsYouFetch(retrieveCurrentUser, [
+    props.teamNumber,
+  ]);
+
+  return (
+    <Card>
+      <p>Welcome {currentUser.get()}</p>
+      <p>Team name: {props.team.teamName}</p>
+    </Card>
+  );
+}
+
+type PropsContent = {
+  team: Team;
+};
+
+function Content(props: PropsContent) {
+  return (
+    <Card>
+      Team members are:
       <ul>
-        <Member id={`id:${props.teamNumber + 1000}`} />
-      </ul>
-      <p>Members:</p>
-      <ul>
-        {team.get().members.map((userId) => (
-          <Member key={userId} id={userId} />
+        {props.team.members.map((memberId) => (
+          <li key={memberId}>
+            <Member id={memberId} />
+          </li>
         ))}
       </ul>
-      <p>Referee:</p>
-      <ul>
-        <Member id={`id:${props.teamNumber + 2000}`} />
-      </ul>
-    </div>
+    </Card>
   );
 }
 
 type PropsMember = { id: string };
 
 function Member(props: PropsMember) {
-  const memberName = useRenderAsYouFetch(retrieveMemberName, [props.id]);
+  const name = useRenderAsYouFetch(retrieveMemberName, [props.id]);
 
   return (
-    <li>
-      id({props.id}) =&gt; {memberName.get()}
-    </li>
+    <span>
+      id({props.id}) =&gt; {name.get()}
+    </span>
+  );
+}
+
+type PropsFooter = {
+  teamNumber: number;
+};
+
+function Footer(props: PropsFooter) {
+  const news = useRenderAsYouFetch(retrieveNews, [props.teamNumber]);
+
+  return (
+    <Card>
+      Got new regarding your favourite team:
+      <ul>
+        {news.get().map((n, i) => (
+          <li key={i}>{n}</li>
+        ))}
+      </ul>
+    </Card>
   );
 }
