@@ -1,5 +1,7 @@
 // Display closer to App1 but in as-you-fetch mode
 // and with optimized queries.
+// It seems that out helper 'derive' comes with a bug making it unusable
+// in such case. Fixing it would clearly provide a better dev experience.
 
 import { Suspense, useRef, useState } from "react";
 import {
@@ -32,11 +34,8 @@ function Page(props: PageProps) {
 
   return (
     <div>
-      <Header
-        teamNumber={props.teamNumber}
-        teamName={team.derive((t) => t.teamName)}
-      />
-      <Content members={team.derive((t) => t.members)} />
+      <Header teamNumber={props.teamNumber} team={team} />
+      <Content team={team} />
       <Footer teamNumber={props.teamNumber} />
     </div>
   );
@@ -44,7 +43,7 @@ function Page(props: PageProps) {
 
 type PropsHeader = {
   teamNumber: number;
-  teamName: AsYouFetch<Team["teamName"]>;
+  team: AsYouFetch<Team>;
 };
 
 function Header(props: PropsHeader) {
@@ -58,7 +57,7 @@ function Header(props: PropsHeader) {
         {() => (
           <>
             <p>Welcome {currentUser.get()}</p>
-            <p>Team name: {props.teamName.get()}</p>
+            <p>Team name: {props.team.get().teamName}</p>
           </>
         )}
       </AsYouFetchSuspense>
@@ -67,7 +66,7 @@ function Header(props: PropsHeader) {
 }
 
 type PropsContent = {
-  members: AsYouFetch<Team["members"]>;
+  team: AsYouFetch<Team>;
 };
 
 function Content(props: PropsContent) {
@@ -79,7 +78,7 @@ function Content(props: PropsContent) {
             Team members are:
             <ul>
               <Suspense fallback={<li>Please wait...</li>}>
-                {props.members.get().map((memberId) => (
+                {props.team.get().members.map((memberId) => (
                   <li key={memberId}>
                     <Member id={memberId} />
                   </li>
