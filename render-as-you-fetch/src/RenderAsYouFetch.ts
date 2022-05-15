@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-type AsYouFetch<T> = {
+export type AsYouFetch<T> = {
   get: () => T;
   derive: <U>(mapper: (value: T) => U) => AsYouFetch<U>;
 };
