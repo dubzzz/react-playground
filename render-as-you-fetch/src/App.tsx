@@ -1,6 +1,38 @@
-import { Suspense, useState } from "react";
-import Team, { TeamNoIntermediateSpinner } from "./Team";
-import TeamClassic from "./TeamClassic";
+import { useState } from "react";
+import App1 from "./App1";
+import App2 from "./App2";
+import App3 from "./App3";
+
+const KnownTypes = [App1, App2, App3];
+
+function App() {
+  const [cb, setCb] = useState(0);
+  const [type, setType] = useState(0);
+
+  const SelectedApp = KnownTypes[type];
+
+  return (
+    <div>
+      {KnownTypes.map((_Compo, index) => (
+        <button
+          key={index}
+          onClick={() => {
+            setType(index);
+            setCb(Math.ceil(Math.random() * 10000));
+          }}
+          style={type === index ? { border: "1px solid red" } : {}}
+        >
+          {index + 1}
+        </button>
+      ))}{" "}
+      — Current is {cb} — <span id="counter"></span>
+      <Br />
+      {<SelectedApp cb={cb} />}
+    </div>
+  );
+}
+
+export default App;
 
 function Br() {
   return (
@@ -13,41 +45,3 @@ function Br() {
     ></div>
   );
 }
-
-function App() {
-  const [cb, setCb] = useState(0);
-  const [type, setType] = useState(0);
-
-  return (
-    <div>
-      <button onClick={() => setCb(Math.ceil(Math.random() * 10000))}>
-        Run
-      </button>{" "}
-      — Current is {cb} — <span id="counter"></span>
-      <Br />
-      <button
-        onClick={() => {
-          setType((t) => (t + 1) % 3);
-          setCb(Math.ceil(Math.random() * 10000));
-        }}
-      >
-        Change
-      </button>
-      — {["As-You-Fetch (1)", "As-You-Fetch (2)", "Classic"][type]}
-      <Br />
-      {type === 2 ? (
-        <TeamClassic cb={cb} />
-      ) : type === 1 ? (
-        <Suspense fallback={<div>Please wait...</div>}>
-          <Team cb={cb} />
-        </Suspense>
-      ) : (
-        <Suspense fallback={<div>Please wait...</div>}>
-          <TeamNoIntermediateSpinner cb={cb} />
-        </Suspense>
-      )}
-    </div>
-  );
-}
-
-export default App;

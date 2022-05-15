@@ -1,10 +1,22 @@
+// Pretty close to App1 but enabling render-as-you-fetch capabilities.
+// It still performs the same way in terms of requests but the loading states
+// are done handled via the parents through Suspense
+
 import { Suspense } from "react";
 import { retrieveUserIds, retrieveUserName } from "./api/Fetcher";
 import { useRenderAsYouFetch } from "./RenderAsYouFetch";
 
 type Props = { cb: number };
 
-export default function Team(props: Props) {
+export default function App(props: Props) {
+  return (
+    <Suspense fallback={<div>Please wait...</div>}>
+      <Team {...props} />
+    </Suspense>
+  );
+}
+
+function Team(props: Props) {
   const users = useRenderAsYouFetch(retrieveUserIds, [props.cb]);
 
   return (
@@ -36,36 +48,9 @@ export default function Team(props: Props) {
   );
 }
 
-export function TeamNoIntermediateSpinner(props: Props) {
-  // To be wrapped into <Suspense />
-  const users = useRenderAsYouFetch(retrieveUserIds, [props.cb]);
+type PropsUser = { userId: string };
 
-  return (
-    <div>
-      <p>
-        <b>Team:</b>
-      </p>
-      <p>Admin:</p>
-      <ul>
-        <User userId={`id:${props.cb + 1000}`} />
-      </ul>
-      <p>Users:</p>
-      <ul>
-        {users.get().map((userId) => (
-          <User key={userId} userId={userId} />
-        ))}
-      </ul>
-      <p>Referee:</p>
-      <ul>
-        <User userId={`id:${props.cb + 2000}`} />
-      </ul>
-    </div>
-  );
-}
-
-type PropsItem = { userId: string };
-
-export function User(props: PropsItem) {
+export function User(props: PropsUser) {
   const userIdToName = useRenderAsYouFetch(retrieveUserName, [props.userId]);
 
   return (
