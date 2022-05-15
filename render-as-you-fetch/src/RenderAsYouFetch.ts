@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 type AsYouFetch<T> = {
   get: () => T;
+  derive: <U>(mapper: (value: T) => U) => AsYouFetch<U>;
 };
 
 const cache = new Map<
@@ -35,6 +36,33 @@ function findOrCreateInCache<TDeps extends unknown[], TOut>(
   return mismatch;
 }
 
+function buildAsYouFetch<TOut, TMapped>(
+  data: {
+    p: Promise<unknown>;
+    out?: TOut | undefined;
+  },
+  mapper: (value: TOut) => TMapped
+): AsYouFetch<TMapped> {
+  return {
+    get: (): TMapped => {
+      if ("out" in data) {
+        return mapper(data.out!);
+      }
+      throw data.p;
+    },
+    derive: <U>(nextMapper: (value: TMapped) => U) => {
+      const newData: {
+        p: Promise<unknown>;
+        out?: TMapped | undefined;
+      } = { p: data.p };
+      if ("out" in data) {
+        newData.out = mapper(data.out!);
+      }
+      return buildAsYouFetch(newData, nextMapper);
+    },
+  };
+}
+
 export function useRenderAsYouFetch<TDeps extends unknown[], TOut>(
   launcher: (...deps: TDeps) => Promise<TOut>,
   deps: TDeps
@@ -44,15 +72,7 @@ export function useRenderAsYouFetch<TDeps extends unknown[], TOut>(
   if (freshData !== data) {
     setData(freshData);
   }
-
-  return {
-    get: (): TOut => {
-      if ("out" in data) {
-        return data.out!;
-      }
-      throw data.p;
-    },
-  };
+  return buildAsYouFetch(data, (d) => d);
 }
 
 export function useClassicFetch<TDeps extends unknown[], TOut>(
