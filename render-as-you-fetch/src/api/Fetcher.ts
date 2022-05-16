@@ -18,7 +18,7 @@ function delay<T>(p: Promise<T>, type: string): Promise<T> {
   numQueries[type] = (numQueries[type] || 0) + 1;
   updateCounter();
   return new Promise<T>((resolve) => {
-    setTimeout(() => resolve(p), 5000 + Math.random() * 5000);
+    setTimeout(() => resolve(p), 1000 + Math.random() * 2000);
   }).finally(() => {
     --numQueries[type];
     updateCounter();
