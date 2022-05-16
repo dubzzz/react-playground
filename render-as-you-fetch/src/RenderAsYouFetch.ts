@@ -6,7 +6,8 @@ export type AsYouFetch<T> = {
 };
 
 type CachedValue<TOut> = {
-  p: Promise<TOut>;
+  pRef: WeakRef<Promise<TOut>>;
+  pValue: WeakRef<CachedOutput<TOut>>;
   result: { out?: TOut };
   deps: unknown[];
 };
@@ -15,7 +16,10 @@ type CachedOutput<TOut, TOutPromise = TOut> = {
   result: { out?: TOut };
 };
 
-const cache = new Map<unknown, CachedValue<unknown>[]>();
+// While the key of this cache might live forever (case of "global functions"),
+// if the passed function is a temporary variable like the output of `useCallback`
+// it will be garbageable automatically by the GC when needed.
+const cache = new WeakMap<(...args: any[]) => any, CachedValue<unknown>[]>();
 
 function findOrCreateInCache<TDeps extends unknown[], TOut>(
   launcher: (...deps: TDeps) => Promise<TOut>,
@@ -25,23 +29,41 @@ function findOrCreateInCache<TDeps extends unknown[], TOut>(
   if (forLauncher === undefined) {
     forLauncher = [];
     cache.set(launcher, forLauncher);
+  } else {
+    const newForLauncher = forLauncher.filter(
+      (e) => e.pRef.deref() !== undefined && e.pValue.deref() !== undefined
+    );
+    if (newForLauncher.length !== forLauncher.length) {
+      const num = forLauncher.length - newForLauncher.length;
+      console.warn(`Cleaning ${num} cached value(s)`);
+      forLauncher = newForLauncher;
+      cache.set(launcher, forLauncher);
+    }
   }
 
   const match = forLauncher.find((e) => {
     return (
-      e.deps.length === deps.length && e.deps.every((ee, i) => ee === deps[i])
+      e.pRef.deref() !== undefined &&
+      e.pValue.deref() !== undefined &&
+      e.deps.length === deps.length &&
+      e.deps.every((ee, i) => ee === deps[i])
     );
   });
   if (match !== undefined) {
-    return match as CachedOutput<TOut>;
+    const value = (match as CachedValue<TOut>).pValue.deref()!;
+    return value;
   }
-  const mismatch: CachedValue<TOut> = {
-    p: launcher(...deps).then((out) => (mismatch.result.out = out)),
-    deps,
+  const value: CachedOutput<TOut> = {
+    p: launcher(...deps).then((out) => (value.result.out = out)),
     result: {},
   };
-  forLauncher.push(mismatch);
-  return mismatch;
+  forLauncher.push({
+    pRef: new WeakRef(value.p),
+    pValue: new WeakRef(value),
+    deps,
+    result: value.result,
+  });
+  return value;
 }
 
 function buildAsYouFetch<TOut, TMapped>(
