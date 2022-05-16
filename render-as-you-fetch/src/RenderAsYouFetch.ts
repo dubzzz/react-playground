@@ -56,7 +56,13 @@ function buildAsYouFetch<TOut, TMapped>(
         out?: TMapped | undefined;
       } = { p: data.p };
       if ("out" in data) {
-        newData.out = mapper(data.out!);
+        const out = data.out!;
+        Object.defineProperty(newData, "out", {
+          enumerable: true,
+          configurable: false,
+          // Only execute mapper when needed (on get on final derive)
+          get: () => mapper(out),
+        });
       }
       return buildAsYouFetch(newData, nextMapper);
     },
