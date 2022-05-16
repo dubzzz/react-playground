@@ -129,22 +129,20 @@ function Footer(props: PropsFooter) {
 
 type PropsAsYouFetchSuspense = {
   fallback: React.ReactNode;
-  children: () => React.ReactNode;
+  children: () => React.ReactElement;
 };
 
 function AsYouFetchSuspense(props: PropsAsYouFetchSuspense) {
-  const r = useRef(props.children);
-  if (r.current !== props.children) {
-    r.current = props.children;
-  }
-  const [Compo] = useState(() => {
-    return function Compo() {
-      return <>{r.current()}</>;
-    };
-  });
   return (
     <Suspense fallback={props.fallback}>
-      <Compo />
+      <AsYouFetchSuspenseInternal {...props} />
     </Suspense>
   );
+}
+
+function AsYouFetchSuspenseInternal(
+  props: Pick<PropsAsYouFetchSuspense, "children">
+) {
+  const Compo = props.children;
+  return <Compo />;
 }
