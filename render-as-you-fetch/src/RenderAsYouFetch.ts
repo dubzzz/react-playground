@@ -5,15 +5,22 @@ export type AsYouFetch<T> = {
   derive: <U>(mapper: (value: T) => U) => AsYouFetch<U>;
 };
 
-const cache = new Map<
-  unknown,
-  { p: Promise<unknown>; out?: unknown; deps: unknown[] }[]
->();
+type CachedValue<TOut> = {
+  p: Promise<TOut>;
+  result: { out?: TOut };
+  deps: unknown[];
+};
+type CachedOutput<TOut, TOutPromise = TOut> = {
+  p: Promise<TOutPromise>;
+  result: { out?: TOut };
+};
+
+const cache = new Map<unknown, CachedValue<unknown>[]>();
 
 function findOrCreateInCache<TDeps extends unknown[], TOut>(
   launcher: (...deps: TDeps) => Promise<TOut>,
   deps: TDeps
-): { p: Promise<TOut>; out?: TOut } {
+): CachedOutput<TOut> {
   let forLauncher = cache.get(launcher);
   if (forLauncher === undefined) {
     forLauncher = [];
@@ -26,37 +33,35 @@ function findOrCreateInCache<TDeps extends unknown[], TOut>(
     );
   });
   if (match !== undefined) {
-    return match as { p: Promise<TOut>; out?: TOut };
+    return match as CachedOutput<TOut>;
   }
-  const mismatch: { p: Promise<TOut>; out?: TOut; deps: TDeps } = {
-    p: launcher(...deps).then((out) => (mismatch.out = out)),
+  const mismatch: CachedValue<TOut> = {
+    p: launcher(...deps).then((out) => (mismatch.result.out = out)),
     deps,
+    result: {},
   };
   forLauncher.push(mismatch);
   return mismatch;
 }
 
 function buildAsYouFetch<TOut, TMapped>(
-  data: {
-    p: Promise<unknown>;
-    out?: TOut | undefined;
-  },
+  data: CachedOutput<TOut, unknown>,
   mapper: (value: TOut) => TMapped
 ): AsYouFetch<TMapped> {
   return {
     get: (): TMapped => {
-      if ("out" in data) {
-        return mapper(data.out!);
+      if ("out" in data.result) {
+        return mapper(data.result.out!);
       }
       throw data.p;
     },
     derive: <U>(nextMapper: (value: TMapped) => U) => {
-      const newData: {
-        p: Promise<unknown>;
-        out?: TMapped | undefined;
-      } = { p: data.p };
-      if ("out" in data) {
-        const out = data.out!;
+      const newData: CachedOutput<TMapped, unknown> = {
+        p: data.p,
+        result: {},
+      };
+      if ("out" in data.result) {
+        const out = data.result.out!;
         Object.defineProperty(newData, "out", {
           enumerable: true,
           configurable: false,
@@ -94,8 +99,8 @@ export function useClassicFetch<TDeps extends unknown[], TOut>(
   const [fetched, setFetched] = useState<TOut>();
   useEffect(() => {
     const data = findOrCreateInCache(launcher, deps);
-    if ("out" in data) {
-      setFetched(data.out);
+    if ("out" in data.result) {
+      setFetched(data.result.out);
       return;
     }
     let canceled = false;
