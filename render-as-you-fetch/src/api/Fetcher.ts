@@ -5,13 +5,14 @@ function updateCounter() {
   if (!counterDiv) {
     return;
   }
-  counterDiv.innerText = `${Object.values(numQueries).reduce(
-    (a, b) => a + b,
-    0
-  )} running (${Object.entries(numQueries)
+  const numRunning = Object.values(numQueries).reduce((a, b) => a + b, 0);
+  const detailedRunning = Object.entries(numQueries)
     .filter((query) => query[1] > 0)
     .map((query) => `${query[0]}: ${query[1]}`)
-    .join(", ")})`;
+    .join(", ");
+  counterDiv.innerText = `${numRunning} running${
+    detailedRunning.length !== 0 ? ` (${detailedRunning})` : ""
+  }`;
 }
 
 function delay<T>(p: Promise<T>, type: string): Promise<T> {
