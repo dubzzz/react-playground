@@ -34,8 +34,11 @@ function Page(props: PageProps) {
 
   return (
     <div>
-      <Header teamNumber={props.teamNumber} team={team} />
-      <Content team={team} />
+      <Header
+        teamNumber={props.teamNumber}
+        teamName={team.derive((t) => t.teamName)}
+      />
+      <Content members={team.derive((t) => t.members)} />
       <Footer teamNumber={props.teamNumber} />
     </div>
   );
@@ -43,7 +46,7 @@ function Page(props: PageProps) {
 
 type PropsHeader = {
   teamNumber: number;
-  team: AsYouFetch<Team>;
+  teamName: AsYouFetch<Team["teamName"]>;
 };
 
 function Header(props: PropsHeader) {
@@ -57,7 +60,7 @@ function Header(props: PropsHeader) {
         {() => (
           <>
             <p>Welcome {currentUser.get()}</p>
-            <p>Team name: {props.team.get().teamName}</p>
+            <p>Team name: {props.teamName.get()}</p>
           </>
         )}
       </AsYouFetchSuspense>
@@ -66,7 +69,7 @@ function Header(props: PropsHeader) {
 }
 
 type PropsContent = {
-  team: AsYouFetch<Team>;
+  members: AsYouFetch<Team["members"]>;
 };
 
 function Content(props: PropsContent) {
@@ -78,7 +81,7 @@ function Content(props: PropsContent) {
             Team members are:
             <ul>
               <Suspense fallback={<li>Please wait...</li>}>
-                {props.team.get().members.map((memberId) => (
+                {props.members.get().map((memberId) => (
                   <li key={memberId}>
                     <Member id={memberId} />
                   </li>

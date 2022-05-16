@@ -72,8 +72,12 @@ function buildAsYouFetch<TOut, TMapped>(
 ): AsYouFetch<TMapped> {
   return {
     get: (): TMapped => {
-      if ("out" in data.result) {
-        return mapper(data.result.out!);
+      // Ideally we should test for the existence of out via "in"
+      // But it led to unwanted behaviour with "derive" method.
+      // Warning: Current implementation does not handle undefined
+      // as a legit value for out.
+      if (data.result.out !== undefined) {
+        return mapper(data.result.out);
       }
       throw data.p;
     },
@@ -82,15 +86,13 @@ function buildAsYouFetch<TOut, TMapped>(
         p: data.p,
         result: {},
       };
-      if ("out" in data.result) {
-        const out = data.result.out!;
-        Object.defineProperty(newData, "out", {
-          enumerable: true,
-          configurable: false,
-          // Only execute mapper when needed (on get on final derive)
-          get: () => mapper(out),
-        });
-      }
+      Object.defineProperty(newData.result, "out", {
+        enumerable: true,
+        configurable: false,
+        // Only execute mapper when needed (on get on final derive)
+        get: () =>
+          data.result.out !== undefined ? mapper(data.result.out) : undefined,
+      });
       return buildAsYouFetch(newData, nextMapper);
     },
   };
