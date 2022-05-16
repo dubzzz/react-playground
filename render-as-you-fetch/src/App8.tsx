@@ -1,7 +1,7 @@
 // Display closer to App1 but in as-you-fetch mode
 // and with optimized queries.
 
-import { Suspense, useRef, useState } from "react";
+import { Suspense } from "react";
 import {
   retrieveTeam,
   retrieveMemberName,
@@ -10,7 +10,11 @@ import {
   retrieveNews,
 } from "./api/Fetcher";
 import Card from "./Card";
-import { AsYouFetch, useRenderAsYouFetch } from "./RenderAsYouFetch";
+import {
+  AsYouFetch,
+  AsYouFetchSuspense,
+  useRenderAsYouFetch,
+} from "./RenderAsYouFetch";
 
 type Props = { teamNumber: number };
 
@@ -125,24 +129,4 @@ function Footer(props: PropsFooter) {
       </AsYouFetchSuspense>
     </Card>
   );
-}
-
-type PropsAsYouFetchSuspense = {
-  fallback: React.ReactNode;
-  children: () => React.ReactElement;
-};
-
-function AsYouFetchSuspense(props: PropsAsYouFetchSuspense) {
-  return (
-    <Suspense fallback={props.fallback}>
-      <AsYouFetchSuspenseInternal {...props} />
-    </Suspense>
-  );
-}
-
-function AsYouFetchSuspenseInternal(
-  props: Pick<PropsAsYouFetchSuspense, "children">
-) {
-  const Compo = props.children;
-  return <Compo />;
 }

@@ -1,9 +1,90 @@
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+
+/******************************************/
+/* Main hooks                             */
+/******************************************/
 
 export type AsYouFetch<T> = {
   get: () => T;
   derive: <U>(mapper: (value: T) => U) => AsYouFetch<U>;
 };
+
+export function useRenderAsYouFetch<TDeps extends unknown[], TOut>(
+  launcher: (...deps: TDeps) => Promise<TOut>,
+  deps: TDeps
+): AsYouFetch<TOut> {
+  const [data, setData] = useState(() => findOrCreateInCache(launcher, deps));
+  const freshData = findOrCreateInCache(launcher, deps);
+  if (freshData !== data) {
+    setData(freshData);
+  }
+  return buildAsYouFetch(data, (d) => d);
+}
+
+/******************************************/
+/* Main components                        */
+/******************************************/
+
+type PropsAsYouFetchSuspense = {
+  fallback: React.ReactNode;
+  children: () => React.ReactElement;
+};
+
+export function AsYouFetchSuspense(props: PropsAsYouFetchSuspense) {
+  return (
+    <Suspense fallback={props.fallback}>
+      <AsYouFetchSuspenseInternal {...props} />
+    </Suspense>
+  );
+}
+
+function AsYouFetchSuspenseInternal(
+  props: Pick<PropsAsYouFetchSuspense, "children">
+) {
+  const Compo = props.children;
+  return <Compo />;
+}
+
+/******************************************/
+/* Legacy mode hooks                      */
+/******************************************/
+
+export function useClassicFetch<TDeps extends unknown[], TOut>(
+  launcher: (...deps: TDeps) => Promise<TOut>,
+  deps: TDeps
+): TOut | undefined {
+  const [data, setData] = useState(() => findOrCreateInCache(launcher, deps));
+  const freshData = findOrCreateInCache(launcher, deps);
+  if (freshData !== data) {
+    setData(freshData);
+  }
+
+  const [fetched, setFetched] = useState<TOut>();
+  useEffect(() => {
+    const data = findOrCreateInCache(launcher, deps);
+    if ("out" in data.result) {
+      setFetched(data.result.out);
+      return;
+    }
+    let canceled = false;
+    setFetched(undefined);
+    data.p.then((out) => {
+      if (canceled) {
+        return;
+      }
+      setFetched(out);
+    });
+    return () => {
+      canceled = true;
+    };
+  }, [launcher, deps]);
+
+  return fetched;
+}
+
+/******************************************/
+/* Internal logic handling cache          */
+/******************************************/
 
 type CachedValue<TOut> = {
   pRef: WeakRef<Promise<TOut>>;
@@ -81,7 +162,7 @@ function buildAsYouFetch<TOut, TMapped>(
       }
       throw data.p;
     },
-    derive: <U>(nextMapper: (value: TMapped) => U) => {
+    derive: function derive<U>(nextMapper: (value: TMapped) => U) {
       const newData: CachedOutput<TMapped, unknown> = {
         p: data.p,
         result: {},
@@ -96,49 +177,4 @@ function buildAsYouFetch<TOut, TMapped>(
       return buildAsYouFetch(newData, nextMapper);
     },
   };
-}
-
-export function useRenderAsYouFetch<TDeps extends unknown[], TOut>(
-  launcher: (...deps: TDeps) => Promise<TOut>,
-  deps: TDeps
-): AsYouFetch<TOut> {
-  const [data, setData] = useState(() => findOrCreateInCache(launcher, deps));
-  const freshData = findOrCreateInCache(launcher, deps);
-  if (freshData !== data) {
-    setData(freshData);
-  }
-  return buildAsYouFetch(data, (d) => d);
-}
-
-export function useClassicFetch<TDeps extends unknown[], TOut>(
-  launcher: (...deps: TDeps) => Promise<TOut>,
-  deps: TDeps
-): TOut | undefined {
-  const [data, setData] = useState(() => findOrCreateInCache(launcher, deps));
-  const freshData = findOrCreateInCache(launcher, deps);
-  if (freshData !== data) {
-    setData(freshData);
-  }
-
-  const [fetched, setFetched] = useState<TOut>();
-  useEffect(() => {
-    const data = findOrCreateInCache(launcher, deps);
-    if ("out" in data.result) {
-      setFetched(data.result.out);
-      return;
-    }
-    let canceled = false;
-    setFetched(undefined);
-    data.p.then((out) => {
-      if (canceled) {
-        return;
-      }
-      setFetched(out);
-    });
-    return () => {
-      canceled = true;
-    };
-  }, [launcher, deps]);
-
-  return fetched;
 }
