@@ -34,39 +34,39 @@ export type Team = {
 };
 
 export function retrieveTeam(teamNumber: number): Promise<Team> {
-  console.info(`START: retrieveTeam(${teamNumber})`);
+  console.debug(`START: retrieveTeam(${teamNumber})`);
   return delay(
     Promise.resolve({
       teamName: `Team ${teamNumber.toString(16).toUpperCase()}`,
       members: [...Array(4)].map((_, i) => "id:" + String(teamNumber + i)),
     }),
     "retrieveTeam"
-  ).finally(() => console.info(`END: retrieveTeam(${teamNumber})`));
+  ).finally(() => console.debug(`END: retrieveTeam(${teamNumber})`));
 }
 
 export function retrieveMemberName(memberId: string): Promise<string> {
-  console.info(`START: retrieveMemberName(${memberId})`);
+  console.debug(`START: retrieveMemberName(${memberId})`);
   return delay(
     Promise.resolve(`User ${memberId.substring(3)}`),
     "retrieveMemberName"
-  ).finally(() => console.info(`END: retrieveMemberName(${memberId})`));
+  ).finally(() => console.debug(`END: retrieveMemberName(${memberId})`));
 }
 
 export function retrieveCurrentUser(teamNumber: number): Promise<string> {
   // teamNumber is used as a cache buster
-  console.info(`START: retrieveCurrentUser(${teamNumber})`);
+  console.debug(`START: retrieveCurrentUser(${teamNumber})`);
   return delay(
     Promise.resolve(`User ${teamNumber.toString(36).toUpperCase()}`),
     "retrieveCurrentUser"
-  ).finally(() => console.info(`END: retrieveCurrentUser(${teamNumber})`));
+  ).finally(() => console.debug(`END: retrieveCurrentUser(${teamNumber})`));
 }
 
 export function retrieveNews(teamNumber: number): Promise<string[]> {
-  console.info(`START: retrieveNews(${teamNumber})`);
+  console.debug(`START: retrieveNews(${teamNumber})`);
   return delay(
     Promise.resolve(
       [...Array(4)].map((_, i) => "news:" + String(teamNumber + i))
     ),
     "retrieveNews"
-  ).finally(() => console.info(`END: retrieveNews(${teamNumber})`));
+  ).finally(() => console.debug(`END: retrieveNews(${teamNumber})`));
 }
