@@ -1,7 +1,5 @@
 // Display closer to App1 but in as-you-fetch mode
 // and with optimized queries.
-// It seems that out helper 'derive' comes with a bug making it unusable
-// in such case. Fixing it would clearly provide a better dev experience.
 
 import { Suspense, useRef, useState } from "react";
 import {
@@ -19,9 +17,6 @@ type Props = { teamNumber: number };
 export default function App(props: Props) {
   return (
     <Suspense fallback={<div>Please wait...</div>}>
-      <p>
-        <i>This App is still a Work-In-Progress</i>
-      </p>
       <Page {...props} />
     </Suspense>
   );
