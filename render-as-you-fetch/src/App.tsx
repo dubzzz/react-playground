@@ -8,7 +8,17 @@ import App6 from "./App6";
 import App7 from "./App7";
 import App8 from "./App8";
 
-const KnownTypes = [Hello, App1, App2, App3, App4, App5, App6, App7, App8];
+const KnownTypes = [
+  { Compo: Hello, bgColor: "#ffffff" },
+  { Compo: App1, bgColor: "#ffffaa" },
+  { Compo: App2, bgColor: "#aaffaa" },
+  { Compo: App3, bgColor: "#aaffaa" },
+  { Compo: App4, bgColor: "#ffffaa" },
+  { Compo: App5, bgColor: "#aaffaa" },
+  { Compo: App6, bgColor: "#aaffaa" },
+  { Compo: App7, bgColor: "#aaffaa" },
+  { Compo: App8, bgColor: "#aaffaa" },
+];
 
 function App() {
   const [teamNumber, setTeamNumber] = useState(0);
@@ -16,11 +26,11 @@ function App() {
   const [transition, setTransition] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const SelectedApp = KnownTypes[type];
+  const SelectedApp = KnownTypes[type].Compo;
 
   return (
     <div>
-      {KnownTypes.map((_Compo, index) => (
+      {KnownTypes.map(({ bgColor }, index) => (
         <button
           key={index}
           onClick={() => {
@@ -31,7 +41,10 @@ function App() {
             if (transition) startTransition(update);
             else update();
           }}
-          style={type === index ? { border: "1px solid red" } : {}}
+          style={{
+            border: `1px solid ${type === index ? "red" : bgColor}`,
+            backgroundColor: bgColor,
+          }}
         >
           {index}
         </button>
@@ -54,7 +67,7 @@ function App() {
           marginBottom: "16px",
         }}
       ></div>
-      {<SelectedApp teamNumber={teamNumber} />}
+      <SelectedApp teamNumber={teamNumber} />
     </div>
   );
 }
