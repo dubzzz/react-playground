@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import App1 from "./App1";
 import App2 from "./App2";
 import App3 from "./App3";
@@ -13,6 +13,8 @@ const KnownTypes = [Hello, App1, App2, App3, App4, App5, App6, App7, App8];
 function App() {
   const [teamNumber, setTeamNumber] = useState(0);
   const [type, setType] = useState(0);
+  const [transition, setTransition] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const SelectedApp = KnownTypes[type];
 
@@ -22,8 +24,12 @@ function App() {
         <button
           key={index}
           onClick={() => {
-            setType(index);
-            setTeamNumber(Math.ceil(Math.random() * 10000));
+            function update() {
+              setType(index);
+              setTeamNumber(Math.ceil(Math.random() * 10000));
+            }
+            if (transition) startTransition(update);
+            else update();
           }}
           style={type === index ? { border: "1px solid red" } : {}}
         >
@@ -31,6 +37,16 @@ function App() {
         </button>
       ))}{" "}
       — Current is {teamNumber} — <span id="counter"></span>
+      <div>
+        <input
+          id="transition"
+          type="checkbox"
+          checked={transition}
+          onChange={(e) => setTransition(e.target.checked)}
+        />
+        <label htmlFor="transition">Transition</label>
+        {isPending ? <span>...</span> : null}
+      </div>
       <div
         style={{
           borderBottom: "1px black solid",
